@@ -19,8 +19,20 @@ Kp_y = 0.8
 Ki_y = 0.0001
 Kd_y = 3
 
+# Reference values
+x_ref = 0.0
+y_ref = 0.0
+theta_ref = 0.0
 
-def simulate_system(x_ref, y_ref, theta_ref, starting_x=0.0, starting_y=0.0, starting_theta=0.0, starting_vx=0.0, starting_vy=0.0, starting_omega=0.0):
+# Initial conditions
+starting_x=0.0
+starting_y=0.0
+starting_theta=0.0
+starting_vx=0.0
+starting_vy=0.0
+starting_omega=0.0
+
+def simulate_system():
     x = starting_x
     y = starting_y
     theta = starting_theta
@@ -84,36 +96,31 @@ def simulate_system(x_ref, y_ref, theta_ref, starting_x=0.0, starting_y=0.0, sta
     return x_positions, y_positions, vx_instances, vy_instances
 
 
-x_positions, y_positions, _, _ = simulate_system(0,10,0)
+x_positions, y_positions, _, _ = simulate_system()
 
 # Plotting
-plt.figure(figsize=(12, 6))
+fig, axs = plt.subplots(3, 1, figsize=(20, 12), sharex=True)
 
-plt.subplot(3, 1, 1)
-plt.plot(x_positions, time_steps, label='X Position', color='blue')
-plt.title('Dron Horizontal Path')
-plt.ylabel('Time (s)')
-plt.xlabel('X Position (m)')
-plt.ylim(0, max_time)
-plt.grid()
-plt.legend()
+axs[0].plot(time_steps, x_positions, label='X Position', color='blue')
+axs[0].set_title('Dron Horizontal Position vs Time')
+axs[0].set_xlabel('Time (s)')
+axs[0].set_ylabel('X Position (m)')
+axs[0].grid()
+axs[0].legend()
 
-plt.subplot(3, 1, 2)
-plt.plot(time_steps, y_positions, label='Y Position', color='green')
-plt.title('Dron Vertical Path')
-plt.xlabel('Time (s)')
-plt.ylabel('Y Position (m)')
-plt.xlim(0, max_time)
-plt.grid()
-plt.legend()
+axs[1].plot(time_steps, y_positions, label='Y Position', color='green')
+axs[1].set_title('Dron Vertical Position vs Time')
+axs[1].set_xlabel('Time (s)')
+axs[1].set_ylabel('Y Position (m)')
+axs[1].grid()
+axs[1].legend()
 
-plt.subplot(3, 1, 3)
-plt.plot(x_positions, y_positions, label='Dron Path', color='red')
-plt.title('Dron Path')
-plt.xlabel('X Position (m)')
-plt.ylabel('Y Position (m)')
-plt.grid()
-plt.legend()
+axs[2].plot(x_positions, y_positions, label='Dron Path', color='red')
+axs[2].set_title('Dron Path')
+axs[2].set_xlabel('X Position (m)')
+axs[2].set_ylabel('Y Position (m)')
+axs[2].grid()
+axs[2].legend()
 
+fig.tight_layout()
 plt.show()
-
