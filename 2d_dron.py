@@ -3,13 +3,13 @@ import matplotlib.pyplot as plt
 import math
 
 # Simulation constants
-m = 5               # Dron mass (kg)
-g = 9.8             # Erth gravity (m/s²)
+m = 5                           # Dron mass (kg)
+g = 9.8                         # Erth gravity (m/s²)
 Fg = m*g
-d = 0.2             # Distance motors-centre (m)
-I = (1/3)*m*(d**2)  # Inertia (kg*m²)
-max_time = 120 # Simulation time (s)
-dt = 0.01            # Time step
+d = 0.2                         # Distance motors-centre (m)
+I = (1/3)*m*(d**2)              # Inertia (kg*m²)
+max_time = 120                  # Simulation time (s)
+dt = 0.01                       # Time step
 n_steps = int(max_time / dt)
 time_steps = np.linspace(0, max_time, n_steps)
 
@@ -19,10 +19,6 @@ Kp_y = 0.8
 Ki_y = 0.0001
 Kd_y = 3
 
-x_ref = 0.0
-y_ref = 10.0
-theta_ref = 0.0
-
 # Initial conditions
 starting_x=0.0
 starting_y=0.0
@@ -31,11 +27,37 @@ starting_vx=0.0
 starting_vy=0.0
 starting_omega=0.0
 
-def pid_controller(theta, error_x, error_y, integral_error_y, derivative_error_y, previous_error_y):
+# Final conditions 
+x_ref = 0.0
+y_ref = 10.0
+theta_ref = 0.0
+
+# Errors
+integral_error_y = 0
+derivative_error_y = 0
+previous_error_y = 0
+integral_error_x = 0
+derivative_error_x = 0
+previous_error_x = 0
+
+def pid_controller(x,y,theta):
+    error_x = x_ref - x
+    error_y = y_ref - y
+
     integral_error_y += error_y * dt
     derivative_error_y = (error_y - previous_error_y) / dt
 
+    integral_error_x += error_x * dt
+    derivative_error_x = (error_x - previous_error_x) / dt
+
+    # if error_y == 0:
+    #     theta_ref = 0
+    # else:
+    #     xy = math.sqrt((x**2)+(y**2))
+    #     theta_ref = math.acos(x/xy)
+
     theta_error = theta_ref - theta
+
 
     torque = Kp_theta * theta_error
     delta_F = torque * I / d    # Force imbalance between motors
@@ -45,8 +67,11 @@ def pid_controller(theta, error_x, error_y, integral_error_y, derivative_error_y
     Fl = (Ftotal - delta_F) / 2
     Fl = (Ftotal + delta_F) / 2
 
-    Fl = np.clip(Fl, 0, 100)
-    Fr = np.clip(Fl, 0, 100)
+    Fl = np.clip(Fl, 0, 50)
+    Fr = np.clip(Fl, 0, 50)
+
+    previous_error_y = error_y
+    previous_error_x = error_x
 
     return Fl, Fr
 
@@ -64,15 +89,8 @@ def simulate_system():
     vx_instances = []
     vy_instances = []
 
-    integral_error_y = 0
-    derivative_error_y = 0
-    previous_error_y = 0
-
     for _ in range(n_steps):
-        error_x = x_ref - x
-        error_y = y_ref - y
-
-        Fl, Fr = pid_controller(theta, error_x, error_y, integral_error_y, derivative_error_y, previous_error_y)
+        Fl, Fr = pid_controller(x,y, theta)
 
         # Vertical movement
         ay = ((Fl + Fr)*math.cos(theta) - Fg)/m
@@ -90,8 +108,6 @@ def simulate_system():
         y += vy * dt
         
         theta += omega * dt
-
-        previous_error_y = error_y
 
         x_positions.append(x)
         y_positions.append(y)
